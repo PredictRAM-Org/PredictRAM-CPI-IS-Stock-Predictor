@@ -18,8 +18,8 @@ def load_data(stock_name, folder_path):
         income_statement_data = stock_data.get('IncomeStatement', [])
 
         # Convert JSON data to Pandas DataFrame
-        balance_sheet = json_normalize(balance_sheet_data)
-        income_statement = json_normalize(income_statement_data)
+        balance_sheet = json_normalize(balance_sheet_data).set_index('Date').T
+        income_statement = json_normalize(income_statement_data).set_index('Date').T
 
         return balance_sheet, income_statement
     else:
@@ -36,25 +36,21 @@ def display_tables(balance_sheet, income_statement, stock_name):
 
 # Function to generate and display a chart
 def generate_chart(balance_sheet, income_statement, stock_name):
-    # Pivot the data to have dates as columns
-    balance_sheet_pivot = balance_sheet.set_index('Date').T
-    income_statement_pivot = income_statement.set_index('Date').T
-
     # Replace 'column_name' with the column you want to use for the chart
     column_name = 'Total Assets'
 
-    # Check if the specified column exists in the pivoted DataFrame
-    if column_name not in balance_sheet_pivot.columns:
+    # Check if the specified column exists in the DataFrame
+    if column_name not in balance_sheet.index:
         st.warning(f"Column '{column_name}' not found in the data.")
         return
 
     # Plotting a bar chart
     plt.figure(figsize=(10, 6))
-    plt.bar(balance_sheet_pivot.index, balance_sheet_pivot[column_name], label='Balance Sheet - Total Assets')
+    plt.bar(balance_sheet.index, balance_sheet.loc[column_name], label='Balance Sheet - Total Assets')
     
     # Check if the specified column exists in the income statement DataFrame
-    if column_name in income_statement_pivot.columns:
-        plt.bar(income_statement_pivot.index, income_statement_pivot[column_name], label='Income Statement - Total Revenue')
+    if column_name in income_statement.index:
+        plt.bar(income_statement.index, income_statement.loc[column_name], label='Income Statement - Total Revenue')
 
     plt.xlabel('Date')
     plt.ylabel(column_name)
@@ -68,7 +64,7 @@ def main():
     st.title('Stock Data Analysis App')
 
     # Replace 'path/to/stock_data/folder' with the actual path to your stock data folder
-    folder_path = 'stock_data'
+    folder_path = 'path/to/stock_data/folder'
 
     # Get the list of stock files in the folder
     stock_files = [file.split('.')[0] for file in os.listdir(folder_path) if file.endswith('.json')]
