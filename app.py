@@ -18,8 +18,16 @@ def load_data(stock_name, folder_path):
         income_statement_data = stock_data.get('IncomeStatement', [])
 
         # Convert JSON data to Pandas DataFrame
-        balance_sheet = json_normalize(balance_sheet_data).set_index('Date').T
-        income_statement = json_normalize(income_statement_data).set_index('Date').T
+        balance_sheet = json_normalize(balance_sheet_data)
+        income_statement = json_normalize(income_statement_data)
+
+        # Convert Date column to datetime format
+        balance_sheet['Date'] = pd.to_datetime(balance_sheet['Date'])
+        income_statement['Date'] = pd.to_datetime(income_statement['Date'])
+
+        # Set Date as the index
+        balance_sheet.set_index('Date', inplace=True)
+        income_statement.set_index('Date', inplace=True)
 
         return balance_sheet, income_statement
     else:
@@ -40,32 +48,23 @@ def generate_chart(balance_sheet, income_statement, stock_name, start_date, end_
     balance_sheet_sorted = balance_sheet.sort_index()
     income_statement_sorted = income_statement.sort_index()
 
-    # Debugging statements to print out start_date and end_date
-    print(f"Debug: start_date={start_date}, end_date={end_date}")
-
     # Filter data for the specified date range
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
-    
-    # Debugging statements to print out converted start_date and end_date
-    print(f"Debug: converted start_date={start_date}, converted end_date={end_date}")
-
     income_statement_filtered = income_statement_sorted.loc[start_date:end_date]
 
-    # Plotting a bar chart for selected columns
+    # Plotting a line chart for selected columns
     plt.figure(figsize=(10, 6))
 
     # Plot Total Revenue/Income if available in the income statement DataFrame
     if 'Total Revenue/Income' in income_statement_filtered.columns:
-        plt.bar(income_statement_filtered.index, income_statement_filtered['Total Revenue/Income'], label='Total Revenue/Income')
+        plt.plot(income_statement_filtered.index, income_statement_filtered['Total Revenue/Income'], label='Total Revenue/Income')
 
     # Plot Total Operating Expense if available in the income statement DataFrame
     if 'Total Operating Expense' in income_statement_filtered.columns:
-        plt.bar(income_statement_filtered.index, income_statement_filtered['Total Operating Expense'], label='Total Operating Expense')
+        plt.plot(income_statement_filtered.index, income_statement_filtered['Total Operating Expense'], label='Total Operating Expense')
 
     # Plot Net Income if available in the income statement DataFrame
     if 'Net Income' in income_statement_filtered.columns:
-        plt.bar(income_statement_filtered.index, income_statement_filtered['Net Income'], label='Net Income')
+        plt.plot(income_statement_filtered.index, income_statement_filtered['Net Income'], label='Net Income')
 
     plt.xlabel('Date')
     plt.ylabel('Amount')
