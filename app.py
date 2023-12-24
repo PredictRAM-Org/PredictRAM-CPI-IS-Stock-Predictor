@@ -36,32 +36,28 @@ def display_tables(balance_sheet, income_statement, stock_name):
 
 # Function to generate and display a chart
 def generate_chart(balance_sheet, income_statement, stock_name):
-    # Replace 'column_name' with the column you want to use for the chart
-    column_name = 'Total Assets'
-
     # Ensure that the indices are sorted before plotting
     balance_sheet_sorted = balance_sheet.sort_index()
     income_statement_sorted = income_statement.sort_index()
 
-    # Check if the specified column exists in the DataFrame
-    if column_name not in balance_sheet_sorted.columns:
-        st.warning(f"Column '{column_name}' not found in the data.")
-        return
-
-    # Plotting a bar chart
+    # Plotting a bar chart for selected columns
     plt.figure(figsize=(10, 6))
 
-    # Check if the specified column exists in the income statement DataFrame
-    if column_name in income_statement_sorted.columns:
-        plt.bar(income_statement_sorted.index, income_statement_sorted[column_name], label='Income Statement - Total Revenue')
+    # Plot Total Revenue/Income if available in the income statement DataFrame
+    if 'Total Revenue/Income' in income_statement_sorted.columns:
+        plt.bar(income_statement_sorted.index, income_statement_sorted['Total Revenue/Income'], label='Total Revenue/Income')
 
-    # Check if the specified column exists in the balance sheet DataFrame
-    if column_name in balance_sheet_sorted.columns:
-        plt.bar(balance_sheet_sorted.index, balance_sheet_sorted[column_name], label='Balance Sheet - Total Assets')
+    # Plot Total Operating Expense if available in the income statement DataFrame
+    if 'Total Operating Expense' in income_statement_sorted.columns:
+        plt.bar(income_statement_sorted.index, income_statement_sorted['Total Operating Expense'], label='Total Operating Expense')
+
+    # Plot Net Income if available in the income statement DataFrame
+    if 'Net Income' in income_statement_sorted.columns:
+        plt.bar(income_statement_sorted.index, income_statement_sorted['Net Income'], label='Net Income')
 
     plt.xlabel('Date')
-    plt.ylabel(column_name)
-    plt.title(f'{stock_name} - Balance Sheet and Income Statement: {column_name}')
+    plt.ylabel('Amount')
+    plt.title(f'{stock_name} - Income Statement Analysis')
     plt.legend()
 
     st.subheader(f'{stock_name} - Chart')
@@ -71,7 +67,7 @@ def main():
     st.title('Stock Data Analysis App')
 
     # Replace 'path/to/stock_data/folder' with the actual path to your stock data folder
-    folder_path = 'stock_data'
+    folder_path = 'path/to/stock_data/folder'
 
     # Get the list of stock files in the folder
     stock_files = [file.split('.')[0] for file in os.listdir(folder_path) if file.endswith('.json')]
