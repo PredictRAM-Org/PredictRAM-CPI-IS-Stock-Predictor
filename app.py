@@ -43,10 +43,18 @@ def generate_chart(balance_sheet, income_statement, stock_name):
     # Replace 'column_name' with the column you want to use for the chart
     column_name = 'Total Assets'
 
+    # Check if the specified column exists in the pivoted DataFrame
+    if column_name not in balance_sheet_pivot.columns:
+        st.warning(f"Column '{column_name}' not found in the data.")
+        return
+
     # Plotting a bar chart
     plt.figure(figsize=(10, 6))
     plt.bar(balance_sheet_pivot.index, balance_sheet_pivot[column_name], label='Balance Sheet - Total Assets')
-    plt.bar(income_statement_pivot.index, income_statement_pivot['Total Revenue/Income'], label='Income Statement - Total Revenue')
+    
+    # Check if the specified column exists in the income statement DataFrame
+    if column_name in income_statement_pivot.columns:
+        plt.bar(income_statement_pivot.index, income_statement_pivot[column_name], label='Income Statement - Total Revenue')
 
     plt.xlabel('Date')
     plt.ylabel(column_name)
