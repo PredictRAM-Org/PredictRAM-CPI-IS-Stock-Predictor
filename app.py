@@ -1,74 +1,64 @@
 import streamlit as st
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
+import matplotlib.pyplot as plt
+import json
+from pandas import json_normalize
 
-# Load stock data and CPI data (Replace with your actual data loading logic)
-# For simplicity, let's assume you have a function `load_data` that returns a DataFrame.
+# Function to load data from stock data folder
 def load_data():
-    # Your data loading logic here...
-    pass
+    # Replace 'path/to/stock_data/folder' with the actual path to your stock data folder
+    folder_path = 'stock_data'
 
-stock_data = load_data()  # Replace with your actual function calls
-cpi_data = load_data()  # Replace with your actual function calls
+    # Load balance sheet and income statement data
+    with open(f'{folder_path}/balance_sheet.json') as f:
+        balance_sheet_data = json.load(f)
 
-# Merge data (Replace with your actual data merging logic)
-# For simplicity, let's assume there is a common column like 'quarter' for merging.
-merged_data = pd.merge(stock_data, cpi_data, on='quarter', how='inner')
+    with open(f'{folder_path}/income_statement.json') as f:
+        income_statement_data = json.load(f)
 
-# Feature engineering (Replace with your actual feature engineering logic)
-# For simplicity, let's assume you have a function `feature_engineering` that returns X and y.
-def feature_engineering(data):
-    # Your feature engineering logic here...
-    pass
+    # Convert JSON data to Pandas DataFrame
+    balance_sheet = json_normalize(balance_sheet_data)
+    income_statement = json_normalize(income_statement_data)
 
-X, y = feature_engineering(merged_data)
+    return balance_sheet, income_statement
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Function to display tables
+def display_tables(balance_sheet, income_statement):
+    st.subheader('Balance Sheet')
+    st.dataframe(balance_sheet)
 
-# Build and train the model
-model = make_pipeline(StandardScaler(), RandomForestRegressor())
-model.fit(X_train, y_train)
+    st.subheader('Income Statement')
+    st.dataframe(income_statement)
 
-# Make predictions on the testing set
-y_pred = model.predict(X_test)
+# Function to generate and display a chart
+def generate_chart(balance_sheet, income_statement):
+    # Replace 'column_name' with the column you want to use for the chart
+    column_name = 'example_column'
 
-# Evaluate the model
-mse = mean_squared_error(y_test, y_pred)
+    # Plotting a bar chart
+    plt.figure(figsize=(10, 6))
+    plt.bar(balance_sheet['Date'], balance_sheet[column_name], label='Balance Sheet')
+    plt.bar(income_statement['Date'], income_statement[column_name], label='Income Statement')
 
-# Streamlit App
-st.title("Stock Prediction App")
+    plt.xlabel('Date')
+    plt.ylabel(column_name)
+    plt.title(f'Balance Sheet and Income Statement: {column_name}')
+    plt.legend()
 
-# Sidebar for user input
-st.sidebar.header("User Input")
+    st.subheader('Chart')
+    st.pyplot()
 
-# Add input elements for user to choose inflation level or provide other relevant information
-# For simplicity, let's assume a slider for inflation level.
-inflation_level = st.sidebar.slider("Inflation Level", min_value=0.0, max_value=10.0, value=5.0)
+def main():
+    st.title('Stock Data Analysis App')
 
-# Display results
-st.subheader("Model Evaluation")
-st.write(f"Mean Squared Error: {mse}")
+    # Load data
+    balance_sheet, income_statement = load_data()
 
-# Visualize results (Replace with your actual visualization logic)
-# For simplicity, let's assume a line chart.
-st.subheader("Actual vs. Predicted Stock Prices")
-result_df = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
-st.line_chart(result_df)
+    # Display tables
+    display_tables(balance_sheet, income_statement)
 
-# Display top 5 predicted stocks (Replace with your actual logic)
-# For simplicity, let's assume sorting stocks based on predicted price change.
-top5_stocks = result_df.sort_values(by='Predicted', ascending=False).head(5)
-st.subheader("Top 5 Stocks Predicted to Increase")
-st.table(top5_stocks)
+    # Generate and display chart
+    generate_chart(balance_sheet, income_statement)
 
-# Additional interactive elements
-# ...
-
-# Save and run the app
-if __name__ == "__main__":
-    st.run_app()
+if __name__ == '__main__':
+    main()
