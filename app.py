@@ -46,11 +46,18 @@ def generate_chart(balance_sheet, income_statement, stock_name):
 
     # Plotting a bar chart
     plt.figure(figsize=(10, 6))
-    plt.bar(balance_sheet.index, balance_sheet.loc[column_name], label='Balance Sheet - Total Assets')
-    
+
+    # Ensure that the indices are sorted before plotting
+    balance_sheet_sorted = balance_sheet.sort_index()
+    income_statement_sorted = income_statement.sort_index()
+
     # Check if the specified column exists in the income statement DataFrame
-    if column_name in income_statement.index:
-        plt.bar(income_statement.index, income_statement.loc[column_name], label='Income Statement - Total Revenue')
+    if column_name in income_statement_sorted.index:
+        plt.bar(income_statement_sorted.index, income_statement_sorted[column_name], label='Income Statement - Total Revenue')
+
+    # Check if the specified column exists in the balance sheet DataFrame
+    if column_name in balance_sheet_sorted.index:
+        plt.bar(balance_sheet_sorted.index, balance_sheet_sorted[column_name], label='Balance Sheet - Total Assets')
 
     plt.xlabel('Date')
     plt.ylabel(column_name)
