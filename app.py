@@ -36,13 +36,17 @@ def display_tables(balance_sheet, income_statement, stock_name):
 
 # Function to generate and display a chart
 def generate_chart(balance_sheet, income_statement, stock_name):
+    # Pivot the data to have dates as columns
+    balance_sheet_pivot = balance_sheet.set_index('Date').T
+    income_statement_pivot = income_statement.set_index('Date').T
+
     # Replace 'column_name' with the column you want to use for the chart
     column_name = 'Total Assets'
 
     # Plotting a bar chart
     plt.figure(figsize=(10, 6))
-    plt.bar(balance_sheet['Date'], balance_sheet[column_name], label='Balance Sheet - Total Assets')
-    plt.bar(income_statement['Date'], income_statement['Total Revenue/Income'], label='Income Statement - Total Revenue')
+    plt.bar(balance_sheet_pivot.index, balance_sheet_pivot[column_name], label='Balance Sheet - Total Assets')
+    plt.bar(income_statement_pivot.index, income_statement_pivot['Total Revenue/Income'], label='Income Statement - Total Revenue')
 
     plt.xlabel('Date')
     plt.ylabel(column_name)
