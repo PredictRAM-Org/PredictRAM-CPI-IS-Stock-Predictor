@@ -64,7 +64,7 @@ def main():
     st.title('Stock Data Analysis App')
 
     # Replace 'path/to/stock_data/folder' with the actual path to your stock data folder
-    folder_path = 'path/to/stock_data/folder'
+    folder_path = 'stock_data'
 
     # Get the list of stock files in the folder
     stock_files = [file.split('.')[0] for file in os.listdir(folder_path) if file.endswith('.json')]
