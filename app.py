@@ -21,15 +21,17 @@ def load_data(stock_name, folder_path):
         balance_sheet = json_normalize(balance_sheet_data)
         income_statement = json_normalize(income_statement_data)
 
-        try:
-            # Convert Date column to datetime format
-            balance_sheet['Date'] = pd.to_datetime(balance_sheet['Date'])
-            income_statement['Date'] = pd.to_datetime(income_statement['Date'])
-        except pd.errors.OutOfBoundsDatetime as e:
-            st.error(f"Error converting date to datetime: {e}")
-            st.error(f"Problematic 'Date' values in balance_sheet: {balance_sheet['Date'].unique()}")
-            st.error(f"Problematic 'Date' values in income_statement: {income_statement['Date'].unique()}")
-            return None, None
+        # Function to parse mixed-format dates
+        def parse_date(date_str):
+            try:
+                return pd.to_datetime(date_str)
+            except pd.errors.OutOfBoundsDatetime:
+                # If the above fails, parse the date with a custom format
+                return pd.to_datetime(date_str, format='%b-%y')
+
+        # Apply the custom date parsing function to the 'Date' column
+        balance_sheet['Date'] = balance_sheet['Date'].apply(parse_date)
+        income_statement['Date'] = income_statement['Date'].apply(parse_date)
 
         # Set Date as the index
         balance_sheet.set_index('Date', inplace=True)
