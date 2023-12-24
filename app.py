@@ -40,9 +40,16 @@ def generate_chart(balance_sheet, income_statement, stock_name, start_date, end_
     balance_sheet_sorted = balance_sheet.sort_index()
     income_statement_sorted = income_statement.sort_index()
 
+    # Debugging statements to print out start_date and end_date
+    print(f"Debug: start_date={start_date}, end_date={end_date}")
+
     # Filter data for the specified date range
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
+    
+    # Debugging statements to print out converted start_date and end_date
+    print(f"Debug: converted start_date={start_date}, converted end_date={end_date}")
+
     income_statement_filtered = income_statement_sorted.loc[start_date:end_date]
 
     # Plotting a bar chart for selected columns
