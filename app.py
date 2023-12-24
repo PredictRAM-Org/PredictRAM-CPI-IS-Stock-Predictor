@@ -54,36 +54,47 @@ def display_tables(balance_sheet, income_statement, stock_name):
     st.dataframe(income_statement)
 
 # Function to generate and display a chart for a specific date range
-def generate_chart(balance_sheet, income_statement, stock_name, start_date, end_date):
+def generate_chart(balance_sheet, income_statement, stock_name):
     # Ensure that the indices are sorted before plotting
     balance_sheet_sorted = balance_sheet.sort_index()
     income_statement_sorted = income_statement.sort_index()
-
-    # Filter data for the specified date range
-    income_statement_filtered = income_statement_sorted.loc[start_date:end_date]
 
     # Plotting a line chart for selected columns
     plt.figure(figsize=(10, 6))
 
     # Plot Total Revenue/Income if available in the income statement DataFrame
-    if 'Total Revenue/Income' in income_statement_filtered.columns:
-        plt.plot(income_statement_filtered.index, income_statement_filtered['Total Revenue/Income'], label='Total Revenue/Income')
+    if 'Total Revenue/Income' in income_statement_sorted.columns:
+        plt.plot(income_statement_sorted.index, income_statement_sorted['Total Revenue/Income'], label='Total Revenue/Income')
 
     # Plot Total Operating Expense if available in the income statement DataFrame
-    if 'Total Operating Expense' in income_statement_filtered.columns:
-        plt.plot(income_statement_filtered.index, income_statement_filtered['Total Operating Expense'], label='Total Operating Expense')
+    if 'Total Operating Expense' in income_statement_sorted.columns:
+        plt.plot(income_statement_sorted.index, income_statement_sorted['Total Operating Expense'], label='Total Operating Expense')
 
     # Plot Net Income if available in the income statement DataFrame
-    if 'Net Income' in income_statement_filtered.columns:
-        plt.plot(income_statement_filtered.index, income_statement_filtered['Net Income'], label='Net Income')
+    if 'Net Income' in income_statement_sorted.columns:
+        plt.plot(income_statement_sorted.index, income_statement_sorted['Net Income'], label='Net Income')
 
     plt.xlabel('Date')
     plt.ylabel('Amount')
-    plt.title(f'{stock_name} - Income Statement Analysis ({start_date} to {end_date})')
+    plt.title(f'{stock_name} - Income Statement Analysis')
     plt.legend()
 
     st.subheader(f'{stock_name} - Chart')
     st.pyplot()
+
+# Function to download tables as Excel
+def download_excel(balance_sheet, income_statement, stock_name):
+    # Save DataFrames to Excel
+    balance_sheet_filename = f'{stock_name}_balance_sheet.xlsx'
+    income_statement_filename = f'{stock_name}_income_statement.xlsx'
+
+    balance_sheet.to_excel(balance_sheet_filename)
+    income_statement.to_excel(income_statement_filename)
+
+    # Provide download links
+    st.markdown(f"**Download {stock_name} Data:**")
+    st.markdown(f"Balance Sheet: [Download {balance_sheet_filename}](/{balance_sheet_filename})")
+    st.markdown(f"Income Statement: [Download {income_statement_filename}](/{income_statement_filename})")
 
 def main():
     st.title('Stock Data Analysis App')
@@ -104,12 +115,11 @@ def main():
         # Display tables with oldest data in first row
         display_tables(balance_sheet, income_statement, selected_stock)
 
-        # Allow the user to specify the date range
-        start_date = st.date_input('Select start date', balance_sheet.index[-1])
-        end_date = st.date_input('Select end date', balance_sheet.index[0])
-
         # Generate and display chart for the specified date range
-        generate_chart(balance_sheet, income_statement, selected_stock, start_date, end_date)
+        generate_chart(balance_sheet, income_statement, selected_stock)
+
+        # Allow the user to download data as Excel
+        download_excel(balance_sheet, income_statement, selected_stock)
 
 if __name__ == '__main__':
     main()
