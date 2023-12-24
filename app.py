@@ -21,9 +21,15 @@ def load_data(stock_name, folder_path):
         balance_sheet = json_normalize(balance_sheet_data)
         income_statement = json_normalize(income_statement_data)
 
-        # Convert Date column to datetime format
-        balance_sheet['Date'] = pd.to_datetime(balance_sheet['Date'])
-        income_statement['Date'] = pd.to_datetime(income_statement['Date'])
+        try:
+            # Convert Date column to datetime format
+            balance_sheet['Date'] = pd.to_datetime(balance_sheet['Date'])
+            income_statement['Date'] = pd.to_datetime(income_statement['Date'])
+        except pd.errors.OutOfBoundsDatetime as e:
+            st.error(f"Error converting date to datetime: {e}")
+            st.error(f"Problematic 'Date' values in balance_sheet: {balance_sheet['Date'].unique()}")
+            st.error(f"Problematic 'Date' values in income_statement: {income_statement['Date'].unique()}")
+            return None, None
 
         # Set Date as the index
         balance_sheet.set_index('Date', inplace=True)
