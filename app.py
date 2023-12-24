@@ -33,9 +33,12 @@ def load_data(stock_name, folder_path):
         balance_sheet['Date'] = balance_sheet['Date'].apply(parse_date)
         income_statement['Date'] = income_statement['Date'].apply(parse_date)
 
-        # Set Date as the index
+        # Set Date as the index and sort in descending order
         balance_sheet.set_index('Date', inplace=True)
+        balance_sheet.sort_index(ascending=False, inplace=True)
+        
         income_statement.set_index('Date', inplace=True)
+        income_statement.sort_index(ascending=False, inplace=True)
 
         return balance_sheet, income_statement
     else:
@@ -86,7 +89,7 @@ def main():
     st.title('Stock Data Analysis App')
 
     # Replace 'path/to/stock_data/folder' with the actual path to your stock data folder
-    folder_path = 'stock_data'
+    folder_path = 'path/to/stock_data/folder'
 
     # Get the list of stock files in the folder
     stock_files = [file.split('.')[0] for file in os.listdir(folder_path) if file.endswith('.json')]
@@ -98,12 +101,12 @@ def main():
     balance_sheet, income_statement = load_data(selected_stock, folder_path)
 
     if balance_sheet is not None and income_statement is not None:
-        # Display tables
+        # Display tables with oldest data in first row
         display_tables(balance_sheet, income_statement, selected_stock)
 
         # Allow the user to specify the date range
-        start_date = st.date_input('Select start date', pd.to_datetime('2012-09-12'))
-        end_date = st.date_input('Select end date', pd.to_datetime('2012-09-23'))
+        start_date = st.date_input('Select start date', balance_sheet.index[-1])
+        end_date = st.date_input('Select end date', balance_sheet.index[0])
 
         # Generate and display chart for the specified date range
         generate_chart(balance_sheet, income_statement, selected_stock, start_date, end_date)
