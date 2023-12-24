@@ -34,30 +34,35 @@ def display_tables(balance_sheet, income_statement, stock_name):
     st.subheader(f'{stock_name} - Income Statement')
     st.dataframe(income_statement)
 
-# Function to generate and display a chart
-def generate_chart(balance_sheet, income_statement, stock_name):
+# Function to generate and display a chart for a specific date range
+def generate_chart(balance_sheet, income_statement, stock_name, start_date, end_date):
     # Ensure that the indices are sorted before plotting
     balance_sheet_sorted = balance_sheet.sort_index()
     income_statement_sorted = income_statement.sort_index()
+
+    # Filter data for the specified date range
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+    income_statement_filtered = income_statement_sorted.loc[start_date:end_date]
 
     # Plotting a bar chart for selected columns
     plt.figure(figsize=(10, 6))
 
     # Plot Total Revenue/Income if available in the income statement DataFrame
-    if 'Total Revenue/Income' in income_statement_sorted.columns:
-        plt.bar(income_statement_sorted.index, income_statement_sorted['Total Revenue/Income'], label='Total Revenue/Income')
+    if 'Total Revenue/Income' in income_statement_filtered.columns:
+        plt.bar(income_statement_filtered.index, income_statement_filtered['Total Revenue/Income'], label='Total Revenue/Income')
 
     # Plot Total Operating Expense if available in the income statement DataFrame
-    if 'Total Operating Expense' in income_statement_sorted.columns:
-        plt.bar(income_statement_sorted.index, income_statement_sorted['Total Operating Expense'], label='Total Operating Expense')
+    if 'Total Operating Expense' in income_statement_filtered.columns:
+        plt.bar(income_statement_filtered.index, income_statement_filtered['Total Operating Expense'], label='Total Operating Expense')
 
     # Plot Net Income if available in the income statement DataFrame
-    if 'Net Income' in income_statement_sorted.columns:
-        plt.bar(income_statement_sorted.index, income_statement_sorted['Net Income'], label='Net Income')
+    if 'Net Income' in income_statement_filtered.columns:
+        plt.bar(income_statement_filtered.index, income_statement_filtered['Net Income'], label='Net Income')
 
     plt.xlabel('Date')
     plt.ylabel('Amount')
-    plt.title(f'{stock_name} - Income Statement Analysis')
+    plt.title(f'{stock_name} - Income Statement Analysis ({start_date} to {end_date})')
     plt.legend()
 
     st.subheader(f'{stock_name} - Chart')
@@ -82,8 +87,12 @@ def main():
         # Display tables
         display_tables(balance_sheet, income_statement, selected_stock)
 
-        # Generate and display chart
-        generate_chart(balance_sheet, income_statement, selected_stock)
+        # Allow the user to specify the date range
+        start_date = st.date_input('Select start date', pd.to_datetime('2012-09-12'))
+        end_date = st.date_input('Select end date', pd.to_datetime('2012-09-23'))
+
+        # Generate and display chart for the specified date range
+        generate_chart(balance_sheet, income_statement, selected_stock, start_date, end_date)
 
 if __name__ == '__main__':
     main()
